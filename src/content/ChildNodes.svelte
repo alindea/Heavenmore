@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Component from "./Component.svelte";
+    import Component from "../components/Component.svelte";
     import Loading from "../Loading.svelte";
     export let childNodes: NodeListOf<ChildNode>;
 
@@ -11,6 +11,15 @@
         for (const attribute of attributes)
             out[attribute.name] = attribute.value || "true";
         return out;
+    };
+
+    const parseJson = (string: string) => {
+        if (!string) return {};
+        try {
+            return JSON.parse(string);
+        } catch (err) {
+            return {};
+        }
     };
 
     const els: { [_: string]: HTMLElement } = {};
@@ -33,8 +42,8 @@
                     bind:this={els[id]}
                     {id}
                 >
-                    <svelte:self childNodes={childNode.childNodes} {hash} />
                     <a class="link-title" href="#{id}">#</a>
+                    <svelte:self childNodes={childNode.childNodes} {hash} />
                 </svelte:element>
             {:else if childNode.nodeName === "A"}
                 <svelte:element this={childNode.nodeName} {...attrs}
@@ -53,13 +62,10 @@
         {:else if childNode.nodeType === Node.TEXT_NODE}
             {childNode.textContent}
         {:else if childNode.nodeType === Node.COMMENT_NODE}
-            {@const icons = childNode.nodeValue?.split("icon:")}
-            {#if icons?.[1]}
-                <Component name={icons[1]} />{" "}
-            {/if}
-            {@const component = childNode.nodeValue?.split("component:")}
-            {#if component?.[1]}
-                <Component name={component[1]} />{" "}
+            {@const component = childNode.nodeValue?.split("component:")?.[1]}
+            {#if component}
+                {@const [name, props] = component.split(/({.*})/)}
+                <Component {name} {...parseJson(props)} />{" "}
             {/if}
         {/if}
     {/each}

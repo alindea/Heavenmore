@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { newError } from "../messages";
+    import { newErrorAlert } from "../alerts/store";
     import ChildNodes from "./ChildNodes.svelte";
 
     let hash = location.hash.substring(1);
@@ -16,7 +16,7 @@
                 .childNodes;
         })
         .catch((err) => {
-            newError("Content: " + err.message);
+            newErrorAlert("Content: " + err.message);
             childNodes = parser.parseFromString(
                 "<br/>Content not found",
                 "text/html",
@@ -27,8 +27,10 @@
 </script>
 
 <main>
-    <h1><a href="/">The Book of Heavenmore</a></h1>
-    <ChildNodes {hash} {childNodes} />
+    <div>
+        <h1><a href="/">The Book of Heavenmore</a></h1>
+        <ChildNodes {hash} {childNodes} />
+    </div>
 </main>
 
 <style>

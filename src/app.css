@@ -64,16 +64,10 @@ main {
   flex: 1;
 }
 
-main>:where(h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  p,
-  form) {
+main>div {
   max-width: 40rem;
-  margin: 1em auto;
+  margin-left: auto;
+  margin-right: auto;
   padding-left: .5rem;
   padding-right: .5rem;
 }
@@ -86,7 +80,6 @@ h5,
 h6 {
   font-family: 'Times New Roman', Times, serif;
   font-weight: bold;
-  margin-bottom: 0;
 }
 
 h1,

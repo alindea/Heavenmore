@@ -2,12 +2,19 @@
     const props = $$props as { [_: string]: string };
 
     const comp: any = {
-        angel: {
-            fun: () => import("./AngelSvg.svelte"),
+        "Angel icon": {
+            fun: () => import("./svg/AngelSvg.svelte"),
             props: { height: props.height || ".85em" },
         },
-        isochrone: {
-            fun: () => import("./Isochrone.svelte"),
+        "Link icon": {
+            fun: () => import("./svg/LinkSvg.svelte"),
+            props: { height: props.height || ".65em" },
+        },
+        "Tautochrone curve": {
+            fun: () => import("./TautochroneCurve.svelte"),
+        },
+        "The multiplication table game": {
+            fun: () => import("./TheMultiplicationTableGame.svelte"),
         },
     }[props.name || ""];
 </script>

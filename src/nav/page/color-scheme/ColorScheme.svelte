@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { selectColorScheme, options } from "./store";
+    import { colorScheme, options } from "./store";
 </script>
 
 <form>
-    <select title="color scheme" bind:value={$selectColorScheme}>
+    <select title="color scheme" bind:value={$colorScheme}>
         {#each options as { value, label }}
             <option {value}>{label}</option>
         {/each}

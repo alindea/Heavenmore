@@ -18,7 +18,7 @@ const darkMetaTag = document.querySelector(
     'meta[media="(prefers-color-scheme: dark)"]'
 ) as HTMLMetaElement | null;
 
-export const selectColorScheme = writable<typeof options[number]['value']>(options[1].value, set => {
+export const colorScheme = writable<typeof options[number]['value']>(options[1].value, set => {
     const offline = localStorage.getItem('color scheme')
     if (!offline) return
     const value = options.find(item => item.value === offline)?.value
@@ -26,7 +26,7 @@ export const selectColorScheme = writable<typeof options[number]['value']>(optio
     set(value)
 });
 
-selectColorScheme.subscribe(value => {
+colorScheme.subscribe(value => {
 
     const colors = options.find(item => item.value === value)?.colors || [darkColor, lightColor]
 

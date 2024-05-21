@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { messages } from ".";
+    import { alerts } from "./store";
     let dialogEl: HTMLDialogElement;
     $: dialogEl?.showModal();
 </script>
 
-{#if $messages.length}
+{#if $alerts.length}
     <dialog
         bind:this={dialogEl}
         role="presentation"
@@ -16,15 +16,15 @@
                 rect.left <= event.clientX &&
                 event.clientX <= rect.left + rect.width;
             if (!isInDialog) {
-                messages.set([]);
+                alerts.set([]);
             }
         }}
     >
-        {#each $messages as item, i}
-            <pre class:color-red={item.type === "error"}><button
+        {#each $alerts as item, i}
+            <pre class:error={item.error}><button
                     type="button"
                     on:click={() =>
-                        ($messages = $messages.filter((_, i1) => i !== i1))}
+                        ($alerts = $alerts.filter((_, i1) => i !== i1))}
                     >&times;</button
                 > {item.value}</pre>
         {/each}
@@ -37,5 +37,8 @@
     }
     pre {
         white-space: break-spaces;
+    }
+    .error {
+        color: var(--color-red-500);
     }
 </style>

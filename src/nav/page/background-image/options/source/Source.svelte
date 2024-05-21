@@ -1,19 +1,25 @@
-<script>
-    import { options, select } from "../../store";
+<script lang="ts">
+    import Component from "../../../../../components/Component.svelte";
+    import { colorScheme } from "../../../color-scheme/store";
+    import { images, backgroundImage } from "../../store";
+
+    let matchColorScheme: "light" | "dark" = "light";
+    matchMedia("(prefers-color-scheme: dark)").addEventListener(
+        "change",
+        (e) => {
+            matchColorScheme = e.matches ? "dark" : "light";
+        },
+    );
+
+    $: scheme = $colorScheme === "auto" ? matchColorScheme : $colorScheme;
+
+    $: image = backgroundImage[scheme];
 </script>
 
 <small
     ><a
         title="background image source"
-        href={options.find((item) => item.value === $select)?.source || "/"}
-        ><svg height="1em" viewBox="0 0 32 32" fill="none">
-            <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M22 3h7v7M27.5 4.5L20 12M17 5H8a3 3 0 00-3 3v16a3 3 0 003 3h16a3 3 0 003-3v-9"
-            />
-        </svg></a
+        href={images[scheme].find((item) => item.value === $image)?.source ||
+            "/"}><Component name="Link icon" height="1em" /></a
     ></small
 >

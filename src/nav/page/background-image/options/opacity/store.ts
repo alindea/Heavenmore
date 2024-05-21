@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 
-export const opacity = writable<number>(parseFloat(localStorage.getItem('background image opacity') || '0.5'))
+export const backgroundImageOpacity = writable<number>(parseFloat(localStorage.getItem('background image opacity') || '0.5'))
 
-opacity.subscribe((value) => {
+backgroundImageOpacity.subscribe((value) => {
     localStorage.setItem('background image opacity', value.toString())
 })

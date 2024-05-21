@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-export const options: { value: string, label: string, source: string }[] = [
+const options: { value: string, label: string, source: string }[] = [
     { value: '', label: 'none', source: '' },
     { value: 'pexels-snapwire-37728.jpg', label: 'clouds', source: 'https://www.pexels.com/photo/cloudy-sky-37728/' },
     { value: 'flowers-3085457_1920.jpg', label: 'flowers', source: 'https://pixabay.com/photos/flowers-botany-outdoors-nature-3085457/' },
@@ -12,10 +12,21 @@ export const options: { value: string, label: string, source: string }[] = [
     { value: 'flower-729514_1920.jpg', label: 'lily', source: 'https://pixabay.com/photos/flower-lily-lilium-candidum-729514/' },
 ]
 
-export const select = writable<string>(localStorage.getItem('background image') || options[1].value)
+export const images = {
+    light: options,
+    dark: options,
+}
 
-select.subscribe((value) => {
-    localStorage.setItem('background image', value)
+export const backgroundImage = {
+    light: writable<string>(localStorage.getItem('background image light') || options[1].value),
+    dark: writable<string>(localStorage.getItem('background image dark') || options[8].value)
+}
+
+backgroundImage.light.subscribe((value) => {
+    localStorage.setItem('background image light', value)
+})
+backgroundImage.dark.subscribe((value) => {
+    localStorage.setItem('background image dark', value)
 })
 
 
