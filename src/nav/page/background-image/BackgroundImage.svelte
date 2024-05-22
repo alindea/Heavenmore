@@ -1,24 +1,14 @@
 <script lang="ts">
-    import { backgroundImage, images } from "./store";
+    import { backgroundImage, imagesColorScheme } from "./store";
     import Options from "./options/Options.svelte";
     import { colorScheme } from "../color-scheme/store";
 
-    let matchColorScheme: "light" | "dark" = "light";
-    matchMedia("(prefers-color-scheme: dark)").addEventListener(
-        "change",
-        (e) => {
-            matchColorScheme = e.matches ? "dark" : "light";
-        },
-    );
-
-    $: scheme = $colorScheme === "auto" ? matchColorScheme : $colorScheme;
-
-    $: image = backgroundImage[scheme];
+    $: image = backgroundImage[$colorScheme];
 </script>
 
 <form>
     <select title="background image" bind:value={$image}>
-        {#each images[scheme] as { value, label }}
+        {#each imagesColorScheme[$colorScheme] as { value, label }}
             <option {value}>{label}</option>
         {/each}
     </select>

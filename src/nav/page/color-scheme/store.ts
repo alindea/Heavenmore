@@ -9,6 +9,8 @@ export const options: { value: 'auto' | 'light' | 'dark', label: string, colors:
     { label: 'dark', value: 'dark', colors: [darkColor, darkColor] },
 ];
 
+const defaultValue = options[1].value
+
 const rootElementDataset = document.documentElement.dataset;
 
 const lightMetaTag = document.querySelector(
@@ -18,7 +20,19 @@ const darkMetaTag = document.querySelector(
     'meta[media="(prefers-color-scheme: dark)"]'
 ) as HTMLMetaElement | null;
 
-export const colorScheme = writable<typeof options[number]['value']>(options[1].value, set => {
+const matchColorSchemeDark = matchMedia("(prefers-color-scheme: dark)")
+
+export const colorScheme = writable<'light' | 'dark'>(defaultValue !== 'auto' ? defaultValue : (matchColorSchemeDark.matches ? 'dark' : 'light'));
+
+matchColorSchemeDark.addEventListener(
+    "change",
+    (e) => {
+        const value = e.matches ? "dark" : "light";
+        colorScheme.set(value)
+    },
+);
+
+export const colorSchemeHtmlTagAttr = writable<typeof options[number]['value']>(defaultValue, set => {
     const offline = localStorage.getItem('color scheme')
     if (!offline) return
     const value = options.find(item => item.value === offline)?.value
@@ -26,16 +40,21 @@ export const colorScheme = writable<typeof options[number]['value']>(options[1].
     set(value)
 });
 
-colorScheme.subscribe(value => {
+colorSchemeHtmlTagAttr.subscribe(value => {
 
     const colors = options.find(item => item.value === value)?.colors || [darkColor, lightColor]
 
     if (darkMetaTag) darkMetaTag.content = colors[0];
     if (lightMetaTag) lightMetaTag.content = colors[1];
 
-    value === 'auto'
-        ? delete rootElementDataset.color_scheme
-        : rootElementDataset.color_scheme = value
+
+    if (value === 'auto') {
+        delete rootElementDataset.color_scheme
+        colorScheme.set((matchColorSchemeDark.matches ? 'dark' : 'light'))
+    } else {
+        rootElementDataset.color_scheme = value
+        colorScheme.set(value)
+    }
 
     localStorage.setItem('color scheme', value);
 })

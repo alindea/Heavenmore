@@ -1,23 +1,15 @@
 <script lang="ts">
-    import { backgroundImageOpacity } from "../nav/page/background-image/options/opacity/store";
+    import { imagesOpacity } from "../nav/page/background-image/options/opacity/store";
     import { backgroundImage } from "../nav/page/background-image/store";
     import { colorScheme } from "../nav/page/color-scheme/store";
 
-    let matchColorScheme: "light" | "dark" = "light";
-    matchMedia("(prefers-color-scheme: dark)").addEventListener(
-        "change",
-        (e) => {
-            matchColorScheme = e.matches ? "dark" : "light";
-        },
-    );
+    $: image = backgroundImage[$colorScheme];
 
-    $: scheme = $colorScheme === "auto" ? matchColorScheme : $colorScheme;
-
-    $: image = backgroundImage[scheme];
+    $: opacity = imagesOpacity[$colorScheme][$image];
 </script>
 
 {#if $image !== ""}<div
-        style="background-image:url('images/{$image}');opacity:{$backgroundImageOpacity}"
+        style="background-image:url('images/{$image}');opacity:{$opacity}"
     />{/if}
 
 <style>

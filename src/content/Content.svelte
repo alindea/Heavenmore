@@ -6,11 +6,13 @@
 
     const parser = new DOMParser();
 
-    fetch(
-        "https://gist.githubusercontent.com/alindea/311ac18445902b1878b936bd5fa06946/raw/book.html?v=" +
-            Date.now(),
-    )
-        .then((r) => r.text())
+    const url =
+        "https://gist.githubusercontent.com/alindea/311ac18445902b1878b936bd5fa06946/raw/book.html";
+
+    fetch(url + "?v=" + Date.now())
+        .then((r) => {
+            return r.text();
+        })
         .then((htmlString) => {
             childNodes = parser.parseFromString(htmlString, "text/html").body
                 .childNodes;
