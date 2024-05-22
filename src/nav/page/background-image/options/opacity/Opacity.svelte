@@ -7,10 +7,11 @@
 
     $: opacity = imagesOpacity[$colorScheme][$image];
 
-    $: localStorage.setItem(
-        `background image opacity ${$colorScheme} ${$image}`,
-        $opacity.toString(),
-    );
+    $: if (opacity)
+        localStorage.setItem(
+            `background image opacity ${$colorScheme} ${$image}`,
+            $opacity.toString(),
+        );
 </script>
 
 <form>
