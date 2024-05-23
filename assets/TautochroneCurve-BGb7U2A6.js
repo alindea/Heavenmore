@@ -1,4 +1,4 @@
-import{S as ue,i as ae,s as he,h as a,j as M,t as S,b as k,c as fe,d as n,k as j,l as x,m as ne,o as L,n as se,e as ce,r as pe,p as de,q as $}from"./index-COMccpO8.js";function be(t){let s,o,P,C,N,F,V,_,z,d,v,A,w,h,I,r,u,b,T,g,y,f,q,G,J,R,K,m,O,W,Q,e,l,c;return{c(){s=a("div"),o=a("canvas"),P=M(),C=a("br"),N=S(t[9]),F=a("br"),V=M(),_=a("label"),z=S("The amount for the current transaction $"),d=a("input"),v=M(),A=a("br"),w=M(),h=a("label"),I=S(`Total number of people to share the amount
+import{S as ue,i as ae,s as he,h as a,j as M,t as S,b as k,c as fe,d as n,k as j,l as x,m as ne,o as L,n as se,e as ce,r as pe,p as de,q as $}from"./index-EIKlLPym.js";function be(t){let s,o,P,C,N,F,V,_,z,d,v,A,w,h,I,r,u,b,T,g,y,f,q,G,J,R,K,m,O,W,Q,e,l,c;return{c(){s=a("div"),o=a("canvas"),P=M(),C=a("br"),N=S(t[9]),F=a("br"),V=M(),_=a("label"),z=S("The amount for the current transaction $"),d=a("input"),v=M(),A=a("br"),w=M(),h=a("label"),I=S(`Total number of people to share the amount
     `),r=a("input"),u=M(),b=a("br"),T=M(),g=a("label"),y=S(`Threshold $1
     `),f=a("input"),q=M(),G=a("br"),J=M(),R=a("label"),K=S(`The share for the person at index
     `),m=a("input"),O=S(`
