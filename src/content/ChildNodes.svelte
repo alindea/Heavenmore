@@ -60,13 +60,16 @@
                 </svelte:element>
             {/if}
         {:else if childNode.nodeType === Node.TEXT_NODE}
-            {childNode.textContent}
+            {#each (childNode.textContent || "").split(/\((.*?);\)/g) as part, index}
+                {#if index % 2}
+                    {@const [name, props] = part.split(/({.*})/)}
+                    <Component {name} {...parseJson(props)} />{" "}
+                {:else}
+                    {part}
+                {/if}
+            {/each}
         {:else if childNode.nodeType === Node.COMMENT_NODE}
-            {@const component = childNode.nodeValue?.split("component:")?.[1]}
-            {#if component}
-                {@const [name, props] = component.split(/({.*})/)}
-                <Component {name} {...parseJson(props)} />{" "}
-            {/if}
+            {@html "<!--" + childNode.nodeValue + "-->"}
         {/if}
     {/each}
 {:else}
