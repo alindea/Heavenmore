@@ -7,9 +7,9 @@ export const imagesOpacity: { light: { [key: string]: Writable<number> }, dark: 
 }
 
 imagesColorScheme.light.forEach(image => {
-    imagesOpacity.light[image.value] = writable<number>(parseFloat(localStorage.getItem(`background image opacity light ${image.value}`) || image.opacity.light.toString()))
+    if (image.opacity) imagesOpacity.light[image.value] = writable<number>(parseFloat(localStorage.getItem(`background image opacity light ${image.value}`) || '' + (image.opacity.light || 0)))
 })
 
 imagesColorScheme.dark.forEach(image => {
-    imagesOpacity.dark[image.value] = writable<number>(parseFloat(localStorage.getItem(`background image opacity dark ${image.value}`) || image.opacity.dark.toString()))
+    if (image.opacity) imagesOpacity.dark[image.value] = writable<number>(parseFloat(localStorage.getItem(`background image opacity dark ${image.value}`) || '' + (image.opacity.dark || 0)))
 })

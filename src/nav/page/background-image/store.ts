@@ -1,20 +1,20 @@
 import { writable } from "svelte/store";
 
-const images: { value: string, label: string, source: string, opacity: { light?: number, dark?: number } }[] = [
-    { value: '', label: 'none', source: '', opacity: { light: .5, dark: .5 } },
-    { value: 'pexels-roman-odintsov-5668103.jpg', label: 'dawn', source: 'https://www.pexels.com/photo/photo-of-clouds-during-dawn-5668103/', opacity: { light: .95, dark: .80 } },
+const images: { value: string, label: string, source: string, opacity?: { light?: number, dark?: number } }[] = [
+    { value: '', label: 'none', source: '', opacity: {} },
+    { value: 'pexels-roman-odintsov-5668103.jpg', label: 'dawn', source: 'https://www.pexels.com/photo/photo-of-clouds-during-dawn-5668103/', opacity: { light: .7, dark: .9 } },
 ]
 
 export const imagesColorScheme = {
     light: [
         ...images,
         { value: 'pexels-snapwire-37728.jpg', label: 'clouds', source: 'https://www.pexels.com/photo/cloudy-sky-37728/', opacity: { light: .5 } },
-        { value: 'pexels-2091109.jpg', label: 'flowers', source: 'https://www.pexels.com/photo/shallow-focus-photo-of-white-flowers-2091109/', opacity: { light: .95 } },
+        { value: 'pexels-2091109.jpg', label: 'flowers', source: 'https://www.pexels.com/photo/shallow-focus-photo-of-white-flowers-2091109/', opacity: { light: .5 } },
     ],
     dark: [
         ...images,
-        { value: 'flower-729514_1920.jpg', label: 'lily', source: 'https://pixabay.com/photos/flower-lily-lilium-candidum-729514/', opacity: { dark: .95 } },
-        { value: 'starry-sky-2051448_1920.jpg', label: 'stars', source: 'https://pixabay.com/photos/starry-sky-night-sky-stars-2051448/', opacity: { dark: .75 } },
+        { value: 'flower-729514_1920.jpg', label: 'lily', source: 'https://pixabay.com/photos/flower-lily-lilium-candidum-729514/', opacity: { dark: .9 } },
+        { value: 'starry-sky-2051448_1920.jpg', label: 'stars', source: 'https://pixabay.com/photos/starry-sky-night-sky-stars-2051448/', opacity: { dark: .80 } },
     ],
 }
 
@@ -29,5 +29,3 @@ backgroundImage.light.subscribe((value) => {
 backgroundImage.dark.subscribe((value) => {
     localStorage.setItem('background image dark', value)
 })
-
-
