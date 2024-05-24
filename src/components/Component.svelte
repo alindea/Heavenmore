@@ -13,8 +13,8 @@
         "Tautochrone curve": {
             fun: () => import("./TautochroneCurve.svelte"),
         },
-        "The multiplication table game": {
-            fun: () => import("./TheMultiplicationTableGame.svelte"),
+        "Multiplication table game": {
+            fun: () => import("./MultiplicationTableGame.svelte"),
         },
     }[props.name || ""];
 </script>

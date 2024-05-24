@@ -16,9 +16,8 @@
                 .childNodes;
         })
         .catch((err) => {
-            newErrorAlert("Content: " + err.message);
             childNodes = parser.parseFromString(
-                "<br/>Content not found",
+                "<br/>" + err.message,
                 "text/html",
             ).body.childNodes;
         });

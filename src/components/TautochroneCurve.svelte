@@ -27,11 +27,25 @@
     ctx.stroke();
   };
 
-  const drawIntersections = (
-    ctx: CanvasRenderingContext2D,
-    population: number,
-    individual: number,
-  ) => {
+  const getY = (x: number) => {
+    let t = Math.PI / 2,
+      converged = false;
+    for (let i = 0; i < 10; i++) {
+      const tNext = t - (t - Math.sin(t) - x / radius) / (1 - Math.cos(t)),
+        delta = Math.abs(tNext - t);
+      t = tNext;
+      if (delta < 1e-8) {
+        converged = true;
+        break;
+      }
+    }
+
+    const y = converged ? radius * (1 - Math.cos(t)) : 0;
+
+    return y;
+  };
+
+  const getIndividual = (population: number, individual: number) => {
     if (individual < 1 || individual > population) return;
 
     const splits = x2 / population;
@@ -41,7 +55,34 @@
     const indX2 = splits * individual,
       indY2 = getY(indX2);
 
-    yPercentage = ((indY2 - indY1) / y2) * 100;
+    const yPercentage = (indY2 - indY1) / y2;
+
+    return { yPercentage, indX1, indY1, indX2, indY2 };
+  };
+
+  const getShare = (
+    population: number,
+    individual: number,
+    resource: number,
+    threshold: boolean,
+  ) => {
+    const values = getIndividual(population, individual);
+    if (!values) return 0;
+    const { yPercentage } = values;
+    const share = yPercentage * resource;
+    const number = threshold ? Math.round(share) : share;
+    return number;
+  };
+
+  const drawIntersections = (
+    ctx: CanvasRenderingContext2D,
+    population: number,
+    individual: number,
+  ) => {
+    const values = getIndividual(population, individual);
+    if (!values) return;
+
+    const { indX1, indY1, indX2, indY2 } = values;
 
     const offsetIndX1 = Math.round(x1 + indX1),
       offsetIndY1 = Math.round(y1 + indY1);
@@ -75,26 +116,6 @@
     ctx.stroke();
   };
 
-  const getY = (x: number) => {
-    let t = Math.PI / 2,
-      converged = false;
-    for (let i = 0; i < 10; i++) {
-      const tNext = t - (t - Math.sin(t) - x / radius) / (1 - Math.cos(t)),
-        delta = Math.abs(tNext - t);
-      t = tNext;
-      if (delta < 1e-8) {
-        converged = true;
-        break;
-      }
-    }
-
-    const y = converged ? radius * (1 - Math.cos(t)) : 0;
-
-    return y;
-  };
-
-  const setInputW = (value: number) => String(value || 0).length + 2 + "ch";
-
   $: if (canvas) {
     canvas.width = canvasW;
     canvas.height = canvasH;
@@ -116,16 +137,10 @@
     if (resource < 1) resource = 1;
     localStorage.setItem("isochrone resource", "" + resource);
   }
-  $: share = threshold
-    ? Math.round((yPercentage / 100) * resource)
-    : (yPercentage / 100) * resource;
+
   $: threshold
     ? localStorage.removeItem("isochrone threshold")
     : localStorage.setItem("isochrone threshold", "-1");
-
-  $: if (elPopulation) elPopulation.style.width = setInputW(population);
-  $: if (elIndividual) elIndividual.style.width = setInputW(individual);
-  $: if (elResource) elResource.style.width = setInputW(resource);
 
   const radius = 100;
 
@@ -137,8 +152,6 @@
   const canvasW = x1 * 2 + x2,
     canvasH = y1 * 2 + y2;
 
-  let yPercentage = 0;
-
   let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D | null;
 
   let population = +(localStorage.getItem("isochrone population") || 10),
@@ -146,9 +159,7 @@
     resource = +(localStorage.getItem("isochrone resource") || 1000000),
     threshold = localStorage.getItem("isochrone threshold") !== "-1";
 
-  let elPopulation: HTMLInputElement,
-    elIndividual: HTMLInputElement,
-    elResource: HTMLInputElement;
+  let elResource: HTMLInputElement;
 
   colorScheme.subscribe(() => {
     draw(ctx, population, individual);
@@ -158,41 +169,145 @@
     draw(ctx, population, individual);
   });
 
-  let tot = 0;
-  $: if (individual === 1) tot = share;
-  else tot += share;
+  let addShareResponsibility: HTMLInputElement,
+    addShareMotive: HTMLTextAreaElement;
+
+  let isSharesDescriptionsDefault = true;
+  const sharesDefault = ["work", "investments"];
+  let shares = [...sharesDefault];
+
+  $: population = shares.length;
 </script>
 
 <div>
   <canvas bind:this={canvas}></canvas>
-  <br />{tot}<br />
-  <label>
-    The amount for the current transaction $<input
-      bind:this={elResource}
-      type="number"
-      bind:value={resource}
-    />
-  </label>
   <br />
   <label>
-    Total number of people to share the amount
-    <input bind:this={elPopulation} bind:value={population} type="number" />
+    $<input bind:this={elResource} type="number" bind:value={resource} />
   </label>
-  <br />
+
   <label>
-    Threshold $1
-    <input type="checkbox" bind:checked={threshold} />
+    <small>Round</small><input type="checkbox" bind:checked={threshold} />
   </label>
+  {#if !isSharesDescriptionsDefault}
+    <button
+      type="button"
+      on:click={() => {
+        shares = [...sharesDefault];
+        isSharesDescriptionsDefault = true;
+        individual = 1;
+        resource = 1000000;
+      }}>Reset</button
+    >
+  {/if}
   <br />
-  <label>
-    The share for the person at index
-    <input bind:this={elIndividual} bind:value={individual} type="number" />
-  </label>
-  = <b>${share}</b>
+
+  <form
+    on:submit|preventDefault={() => {
+      shares.splice(+addShareResponsibility.value - 1, 0, addShareMotive.value);
+      shares = shares;
+      isSharesDescriptionsDefault = false;
+    }}
+  >
+    <table>
+      <tr>
+        <th>Share</th>
+        <th>Responsible</th>
+        <th>Motive</th>
+        <th>Remove</th>
+        <th>Graph</th>
+      </tr>
+
+      {#each shares as motive, i}
+        <tr>
+          <td
+            ><b>${getShare(shares.length, i + 1, resource, threshold) || 0}</b
+            ></td
+          >
+          <td
+            ><button
+              type="button"
+              disabled={i === 0}
+              on:click={() => {
+                shares.splice(i - 1, 0, shares.splice(i, 1)[0]);
+                shares = shares;
+                isSharesDescriptionsDefault = false;
+              }}>+</button
+            >
+            {i + 1}
+            <button
+              type="button"
+              on:click={() => {
+                shares.splice(i + 1, 0, shares.splice(i, 1)[0]);
+                shares = shares;
+                isSharesDescriptionsDefault = false;
+              }}
+              disabled={i === shares.length - 1}>-</button
+            ></td
+          >
+          <td>{motive}</td>
+          <td
+            ><button
+              type="button"
+              style="color:var(--color-red-500);"
+              on:click={() => {
+                shares = shares.filter((_, j) => j !== i);
+                isSharesDescriptionsDefault = false;
+              }}>&times;</button
+            ></td
+          >
+          <td
+            ><label style="display:block;"
+              ><input
+                placeholder="Responsibility graph"
+                on:input={() => {
+                  individual = i + 1;
+                  isSharesDescriptionsDefault = false;
+                }}
+                checked={individual === i + 1}
+                name="individual"
+                type="radio"
+              /></label
+            ></td
+          >
+        </tr>
+      {/each}
+      <tr>
+        <td><button type="submit">Add share</button></td>
+        <td
+          ><label
+            ><input
+              placeholder="share responsibility"
+              min="1"
+              max={shares.length + 1}
+              type="number"
+              name="share-responsibility"
+              bind:this={addShareResponsibility}
+              value={shares.length + 1}
+            /></label
+          ></td
+        >
+        <td colspan="3" style="padding:0;"
+          ><textarea
+            bind:this={addShareMotive}
+            style="display:block;"
+            name="share-motive"
+          ></textarea></td
+        >
+      </tr>
+    </table>
+  </form>
 </div>
 
 <style>
-  input {
-    min-width: 3ch;
+  table,
+  th,
+  td {
+    border: 1px solid;
+  }
+  th,
+  td {
+    font-size: smaller;
+    padding: 0 0.5em;
   }
 </style>

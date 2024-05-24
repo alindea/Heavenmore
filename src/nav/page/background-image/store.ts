@@ -19,8 +19,15 @@ export const imagesColorScheme = {
 }
 
 export const backgroundImage = {
-    light: writable<string>(localStorage.getItem('background image light') || imagesColorScheme.light[2].value),
-    dark: writable<string>(localStorage.getItem('background image dark') || imagesColorScheme.dark[2].value)
+    light: writable<string>(imagesColorScheme.light[2].value, (set) => {
+        const value = localStorage.getItem('background image light')
+        if (typeof value === 'string') set(value)
+
+    }),
+    dark: writable<string>(imagesColorScheme.dark[2].value, (set) => {
+        const value = localStorage.getItem('background image dark')
+        if (typeof value === 'string') set(value)
+    })
 }
 
 backgroundImage.light.subscribe((value) => {
