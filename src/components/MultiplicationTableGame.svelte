@@ -60,7 +60,7 @@
         // build choices
         const buildChoices: number[] = [correctAnswer];
 
-        while (buildChoices.length < 5) {
+        while (buildChoices.length < numberOfChoices) {
             const option = getRandomNumber(100) + 1;
             if (!buildChoices.includes(option)) buildChoices.push(option);
         }
@@ -115,14 +115,15 @@
                 svgHeight = svgBoundaries.height,
                 svgLeft = svgBoundaries.left + window.scrollX,
                 svgTop = svgBoundaries.top + window.scrollY;
-            const celWidth = svgWidth / 5;
 
             const marginTopTable = svgHeight - svgWidth;
             const marginBottomOptions = (marginTopTable / 3) * 2;
 
             if (event.pageY < svgTop + marginBottomOptions) {
                 // choices
-                const number = Math.trunc((event.pageX - svgLeft) / celWidth);
+                const number = Math.trunc(
+                    (event.pageX - svgLeft) / (svgWidth / numberOfChoices),
+                );
                 if (choices[number] === correctAnswer) {
                     // right answer
                     if (questionState?.[number1]?.[number2] !== -1) {
@@ -183,7 +184,9 @@
                     play();
                 }
             } else {
-                const vert = Math.trunc((event.pageX - svgLeft) / celWidth) + 1,
+                const vert =
+                        Math.trunc((event.pageX - svgLeft) / (svgWidth / 5)) +
+                        1,
                     horiz = Math.trunc(
                         (event.pageY - (svgTop + marginTopTable)) /
                             ((svgHeight - marginTopTable) / 2),
@@ -231,13 +234,16 @@
             document.timeline,
         );
 
+    let numberOfChoices = 2;
+
     const width = 1080;
     const height = 1920;
     const strokeWidth = 2;
-    const vertGap = (width - strokeWidth * 2) / 5;
+    const vertGapChoices = (width - strokeWidth * 2) / numberOfChoices;
+    const vertGapQuestions = (width - strokeWidth * 2) / 5;
     const marginTopTable = height - width;
     const marginBottomOptions = (marginTopTable / 3) * 2;
-    const textDX = (width - strokeWidth * 2) / 10;
+    const textDX = (width - strokeWidth * 2) / (numberOfChoices * 2);
 
     let gameOn = false,
         gamePaused = false;
@@ -246,7 +252,7 @@
         number2: number,
         question = "?",
         correctAnswer: number,
-        choices: (string | number)[] = ["?", "?", "?", "?", "?"],
+        choices: (string | number)[] = Array(numberOfChoices).fill("?"),
         questionState: { [_: number]: { [_: number]: number } } = {},
         shuffleNumbers: [number, number[]][] = [],
         shuffleArI1: number,
@@ -269,8 +275,8 @@
             rx="30"
             stroke-width={strokeWidth}
         />
-        {#each Array(4) as _, i}
-            {@const x = vertGap * (i + 1)}
+        {#each Array(numberOfChoices - 1) as _, i}
+            {@const x = vertGapChoices * (i + 1)}
             <line
                 x1={x}
                 x2={x}
@@ -292,8 +298,9 @@
             y1={marginTopTable}
             y2={marginTopTable}
             stroke-width={strokeWidth}
-        />{#each Array(4) as _, i}
-            {@const x = vertGap * (i + 1)}
+        />
+        {#each Array(4) as _, i}
+            {@const x = vertGapQuestions * (i + 1)}
             <line
                 x1={x}
                 x2={x}
@@ -310,7 +317,9 @@
             stroke-width={strokeWidth}
         />
         <g bind:this={choicesEl}>
-            {#each [1, 3, 5, 7, 9] as offset, i (i + "_" + choices[i])}
+            {#each Array(numberOfChoices)
+                .fill(0)
+                .map((_, i) => i * 2 + 1) as offset, i (i + "_" + choices[i])}
                 <g data-opt={choices[i]}>
                     <text y="90" text-anchor="middle" x={textDX * offset}>
                         {choices[i]}

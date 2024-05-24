@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { newErrorAlert } from "../alerts/store";
     import ChildNodes from "./ChildNodes.svelte";
 
     let hash = location.hash.substring(1);
@@ -7,6 +6,7 @@
     const parser = new DOMParser();
 
     const url =
+        localStorage.getItem("url") ||
         "https://gist.githubusercontent.com/alindea/311ac18445902b1878b936bd5fa06946/raw/book.html";
 
     fetch(url + "?v=" + Date.now())

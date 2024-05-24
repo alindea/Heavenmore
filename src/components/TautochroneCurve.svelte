@@ -68,8 +68,7 @@
   ) => {
     const values = getIndividual(population, individual);
     if (!values) return 0;
-    const { yPercentage } = values;
-    const share = yPercentage * resource;
+    const share = values.yPercentage * resource;
     const number = threshold ? Math.round(share) : share;
     return number;
   };
@@ -173,7 +172,7 @@
     addShareMotive: HTMLTextAreaElement;
 
   let isSharesDescriptionsDefault = true;
-  const sharesDefault = ["work", "investments"];
+  const sharesDefault = ["workforce", "capital"];
   let shares = [...sharesDefault];
 
   $: population = shares.length;
@@ -183,11 +182,15 @@
   <canvas bind:this={canvas}></canvas>
   <br />
   <label>
-    $<input bind:this={elResource} type="number" bind:value={resource} />
+    Payment: $<input
+      bind:this={elResource}
+      type="number"
+      bind:value={resource}
+    />
   </label>
 
   <label>
-    <small>Round</small><input type="checkbox" bind:checked={threshold} />
+    <small>Round</small> <input type="checkbox" bind:checked={threshold} />
   </label>
   {#if !isSharesDescriptionsDefault}
     <button
@@ -200,7 +203,6 @@
       }}>Reset</button
     >
   {/if}
-  <br />
 
   <form
     on:submit|preventDefault={() => {
