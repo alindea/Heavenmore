@@ -168,14 +168,22 @@
     draw(ctx, population, individual);
   });
 
-  let addShareResponsibility: HTMLInputElement,
-    addShareMotive: HTMLTextAreaElement;
+  let addShareImpact: HTMLInputElement, addShareMotive: HTMLTextAreaElement;
 
-  let isSharesDescriptionsDefault = true;
+  let isSharesDefault = true;
   const sharesDefault = ["workforce", "capital"];
   let shares = [...sharesDefault];
 
   $: population = shares.length;
+
+  const getTimeWithMs = () => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const seconds = now.getSeconds().toString().padStart(2, "0");
+    const milliseconds = now.getMilliseconds();
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+  };
 </script>
 
 <div>
@@ -192,12 +200,12 @@
   <label>
     <small>Round</small> <input type="checkbox" bind:checked={threshold} />
   </label>
-  {#if !isSharesDescriptionsDefault}
+  {#if !isSharesDefault}
     <button
       type="button"
       on:click={() => {
         shares = [...sharesDefault];
-        isSharesDescriptionsDefault = true;
+        isSharesDefault = true;
         individual = 1;
         resource = 1000000;
       }}>Reset</button
@@ -206,15 +214,20 @@
 
   <form
     on:submit|preventDefault={() => {
-      shares.splice(+addShareResponsibility.value - 1, 0, addShareMotive.value);
+      shares.splice(
+        +addShareImpact.value - 1,
+        0,
+        addShareMotive.value || getTimeWithMs(),
+      );
       shares = shares;
-      isSharesDescriptionsDefault = false;
+      addShareMotive.value = "";
+      isSharesDefault = false;
     }}
   >
     <table>
       <tr>
         <th>Share</th>
-        <th>Responsible</th>
+        <th>Impact</th>
         <th>Motive</th>
         <th>Remove</th>
         <th>Graph</th>
@@ -226,15 +239,15 @@
             ><b>${getShare(shares.length, i + 1, resource, threshold) || 0}</b
             ></td
           >
-          <td
-            ><button
+          <td>
+            <button
               type="button"
               disabled={i === 0}
               on:click={() => {
                 shares.splice(i - 1, 0, shares.splice(i, 1)[0]);
                 shares = shares;
-                isSharesDescriptionsDefault = false;
-              }}>+</button
+                isSharesDefault = false;
+              }}>-</button
             >
             {i + 1}
             <button
@@ -242,11 +255,11 @@
               on:click={() => {
                 shares.splice(i + 1, 0, shares.splice(i, 1)[0]);
                 shares = shares;
-                isSharesDescriptionsDefault = false;
+                isSharesDefault = false;
               }}
-              disabled={i === shares.length - 1}>-</button
-            ></td
-          >
+              disabled={i === shares.length - 1}>+</button
+            >
+          </td>
           <td>{motive}</td>
           <td
             ><button
@@ -254,17 +267,17 @@
               style="color:var(--color-red-500);"
               on:click={() => {
                 shares = shares.filter((_, j) => j !== i);
-                isSharesDescriptionsDefault = false;
+                isSharesDefault = false;
               }}>&times;</button
             ></td
           >
           <td
             ><label style="display:block;"
               ><input
-                placeholder="Responsibility graph"
+                placeholder="graph"
                 on:input={() => {
                   individual = i + 1;
-                  isSharesDescriptionsDefault = false;
+                  isSharesDefault = false;
                 }}
                 checked={individual === i + 1}
                 name="individual"
@@ -279,12 +292,12 @@
         <td
           ><label
             ><input
-              placeholder="share responsibility"
+              placeholder="share Impact"
               min="1"
               max={shares.length + 1}
               type="number"
-              name="share-responsibility"
-              bind:this={addShareResponsibility}
+              name="share-impact"
+              bind:this={addShareImpact}
               value={shares.length + 1}
             /></label
           ></td
