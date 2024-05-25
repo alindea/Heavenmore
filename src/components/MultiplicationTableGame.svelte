@@ -34,12 +34,8 @@
     const playing = () => {
         // end game
         if (!shuffleNumbers.length) {
-            gameOn = false;
-            choices = ["?", "?", "?", "?", "?"];
+            gameEnd(numberOfChoices);
             question = "✓";
-            questionState = {};
-            beginQuestionShake();
-            choicesElSlide.cancel();
             return false;
         }
 
@@ -92,13 +88,24 @@
     const pause = () => {
         gamePaused = true;
         beginQuestionShake();
-        choicesElSlide.pause();
+        choicesElSlide?.pause();
     };
 
     const unpause = () => {
         gamePaused = false;
         endQuestionShake();
-        choicesElSlide.play();
+        choicesElSlide?.play();
+    };
+
+    const gameEnd = (numberOfChoices: number) => {
+        gameOn = false;
+        choices = Array(numberOfChoices).fill("?");
+        questionState = {};
+        beginQuestionShake();
+        choicesElSlide?.cancel();
+        shuffleNumbers = [];
+        playingNumbers = new Set();
+        question = "?";
     };
 
     const numbersToPlayForNumber = (number: number) => {
@@ -116,10 +123,50 @@
                 svgLeft = svgBoundaries.left + window.scrollX,
                 svgTop = svgBoundaries.top + window.scrollY;
 
-            const marginTopTable = svgHeight - svgWidth;
-            const marginBottomOptions = (marginTopTable / 3) * 2;
+            const svgHMinusW = svgHeight - svgWidth;
+            const choicesHeight = (svgHMinusW / 3) * 2;
 
-            if (event.pageY < svgTop + marginBottomOptions) {
+            if (event.pageY < svgTop + (svgHeight - svgHMinusW)) {
+                // numbers table
+                const vert =
+                        Math.trunc((event.pageX - svgLeft) / (svgWidth / 5)) +
+                        1,
+                    horiz = Math.trunc(
+                        (event.pageY - svgTop) / ((svgHeight - svgHMinusW) / 2),
+                    ),
+                    number = vert + 5 * horiz;
+
+                if (playingNumbers.has(number)) {
+                    // remove number
+                    playingNumbers.delete(number);
+
+                    const shuffleIndex = shuffleNumbers.findIndex(
+                        (el) => el[0] === number,
+                    );
+                    if (shuffleIndex !== -1)
+                        shuffleNumbers.splice(shuffleIndex, 1);
+                    delete questionState?.[number];
+                } else {
+                    // add number
+                    playingNumbers.add(number);
+
+                    numbersToPlayForNumber(number);
+                }
+
+                questionState = { ...questionState };
+
+                if (!gameOn) {
+                    gameOn = true;
+                    gamePaused = true;
+                    playing();
+                } else if (playing()) {
+                    choicesElSlide?.cancel();
+                    if (!gamePaused) pause();
+                }
+            } else if (
+                event.pageY <
+                svgTop + (svgHeight - svgHMinusW) + choicesHeight
+            ) {
                 // choices
                 const number = Math.trunc(
                     (event.pageX - svgLeft) / (svgWidth / numberOfChoices),
@@ -160,7 +207,7 @@
                     setQuestionState(-1);
                     beginOptionShake();
                 }
-            } else if (event.pageY < svgTop + marginTopTable) {
+            } else {
                 // question
                 if (gameOn) {
                     if (gamePaused) {
@@ -183,41 +230,6 @@
                     endQuestionShake();
                     play();
                 }
-            } else {
-                const vert =
-                        Math.trunc((event.pageX - svgLeft) / (svgWidth / 5)) +
-                        1,
-                    horiz = Math.trunc(
-                        (event.pageY - (svgTop + marginTopTable)) /
-                            ((svgHeight - marginTopTable) / 2),
-                    ),
-                    number = vert + 5 * horiz;
-                if (playingNumbers.has(number)) {
-                    // remove number
-                    playingNumbers.delete(number);
-
-                    const shuffleIndex = shuffleNumbers.findIndex(
-                        (el) => el[0] === number,
-                    );
-                    if (shuffleIndex !== -1)
-                        shuffleNumbers.splice(shuffleIndex, 1);
-                    delete questionState?.[number];
-                } else {
-                    // add number
-                    playingNumbers.add(number);
-                    numbersToPlayForNumber(number);
-                }
-
-                questionState = { ...questionState };
-
-                if (!gameOn) {
-                    gameOn = true;
-                    gamePaused = true;
-                    playing();
-                } else if (playing()) {
-                    choicesElSlide?.cancel();
-                    if (!gamePaused) pause();
-                }
             }
         };
 
@@ -234,17 +246,12 @@
             document.timeline,
         );
 
-    let numberOfChoices = 2;
-
-    const width = 1080;
-    const height = 1920;
-    const strokeWidth = 2;
-    const vertGapChoices = (width - strokeWidth * 2) / numberOfChoices;
-    const vertGapQuestions = (width - strokeWidth * 2) / 5;
-    const marginTopTable = height - width;
-    const marginBottomOptions = (marginTopTable / 3) * 2;
-    const textDX = (width - strokeWidth * 2) / (numberOfChoices * 2);
-
+    const width = 1080,
+        height = 1920,
+        strokeWidth = 2,
+        vertGapQuestions = (width - strokeWidth * 2) / 5,
+        heightMinusWidth = height - width,
+        choicesHeight = (heightMinusWidth / 3) * 2;
     let gameOn = false,
         gamePaused = false;
 
@@ -252,7 +259,6 @@
         number2: number,
         question = "?",
         correctAnswer: number,
-        choices: (string | number)[] = Array(numberOfChoices).fill("?"),
         questionState: { [_: number]: { [_: number]: number } } = {},
         shuffleNumbers: [number, number[]][] = [],
         shuffleArI1: number,
@@ -263,10 +269,20 @@
         sliding = false;
 
     let svg: SVGElement, choicesEl: SVGGElement, questionEl: SVGGElement;
+
+    let numberOfChoices = +(localStorage.getItem("numberOfChoices") || "2");
+    $: localStorage.setItem("numberOfChoices", "" + numberOfChoices);
+
+    let choices = Array(numberOfChoices).fill("?");
+
+    $: vertGapChoices = (width - strokeWidth * 2) / numberOfChoices;
+    $: textDX = (width - strokeWidth * 2) / (numberOfChoices * 2);
+    $: gameEnd(numberOfChoices);
 </script>
 
 <div>
     <svg bind:this={svg} viewBox="0 0 {width} {height}" fill="none">
+        <!-- outer game -->
         <rect
             x={strokeWidth}
             y={strokeWidth}
@@ -275,73 +291,13 @@
             rx="30"
             stroke-width={strokeWidth}
         />
-        {#each Array(numberOfChoices - 1) as _, i}
-            {@const x = vertGapChoices * (i + 1)}
-            <line
-                x1={x}
-                x2={x}
-                y1={strokeWidth}
-                y2={marginBottomOptions}
-                stroke-width={strokeWidth}
-            />
-        {/each}
-        <line
-            x1={strokeWidth}
-            x2={width - strokeWidth}
-            y1={marginBottomOptions}
-            y2={marginBottomOptions}
-            stroke-width={strokeWidth}
-        />
-        <line
-            x1={strokeWidth}
-            x2={width - strokeWidth}
-            y1={marginTopTable}
-            y2={marginTopTable}
-            stroke-width={strokeWidth}
-        />
-        {#each Array(4) as _, i}
-            {@const x = vertGapQuestions * (i + 1)}
-            <line
-                x1={x}
-                x2={x}
-                y1={marginTopTable}
-                y2={height - strokeWidth}
-                stroke-width={strokeWidth}
-            />
-        {/each}
-        <line
-            x1={strokeWidth}
-            x2={width - strokeWidth}
-            y1={marginTopTable + width / 2}
-            y2={marginTopTable + width / 2}
-            stroke-width={strokeWidth}
-        />
-        <g bind:this={choicesEl}>
-            {#each Array(numberOfChoices)
-                .fill(0)
-                .map((_, i) => i * 2 + 1) as offset, i (i + "_" + choices[i])}
-                <g data-opt={choices[i]}>
-                    <text y="90" text-anchor="middle" x={textDX * offset}>
-                        {choices[i]}
-                    </text>
-                </g>
-            {/each}
-        </g>
-        <g class="shake" bind:this={questionEl}>
-            <text x="535" y="720" text-anchor="middle">
-                {question}
-            </text>
-        </g>
+        <!-- table numbers -->
         {#each Array(10) as _, iv}
             <text>
                 {#each Array(10) as _, ih}
                     {@const x =
                         strokeWidth + 100 + 215 * (iv > 4 ? iv - 5 : iv)}
-                    {@const y =
-                        (iv > 4 ? width / 2 : 0) +
-                        marginTopTable +
-                        43 +
-                        53 * ih}
+                    {@const y = (iv > 4 ? width / 2 : 0) + 0 + 43 + 53 * ih}
                     {#if !gameOn || questionState?.[iv + 1]?.[ih + 1] === 1 || !playingNumbers.has(iv + 1)}<tspan
                             text-anchor="middle"
                             textLength="165"
@@ -368,7 +324,101 @@
                 {/each}
             </text>
         {/each}
+        <!-- table vertical lines -->
+        {#each Array(4) as _, i}
+            {@const x = vertGapQuestions * (i + 1)}
+            <line
+                x1={x}
+                x2={x}
+                y1={0}
+                y2={height - heightMinusWidth - strokeWidth}
+                stroke-width={strokeWidth}
+            />
+        {/each}
+        <!-- table middle horizontal line -->
+        <line
+            x1={strokeWidth}
+            x2={width - strokeWidth}
+            y1={width / 2}
+            y2={width / 2}
+            stroke-width={strokeWidth}
+        />
+        <!-- table bottom line -->
+        <line
+            x1={strokeWidth}
+            x2={width - strokeWidth}
+            y1={width}
+            y2={width}
+            stroke-width={strokeWidth}
+        />
+        <!-- choices -->
+        <g bind:this={choicesEl}>
+            {#each Array(numberOfChoices)
+                .fill(0)
+                .map((_, i) => i * 2 + 1) as offset, i (i + "_" + choices[i])}
+                <g data-opt={choices[i]}>
+                    <text
+                        y={width + 90}
+                        text-anchor="middle"
+                        x={textDX * offset}
+                    >
+                        {choices[i]}
+                    </text>
+                </g>
+            {/each}
+        </g>
+        <!-- choices vertical lines -->
+        {#each Array(numberOfChoices - 1) as _, i}
+            {@const x = vertGapChoices * (i + 1)}
+            <line
+                x1={x}
+                x2={x}
+                y1={width}
+                y2={width + choicesHeight}
+                stroke-width={strokeWidth}
+            />
+        {/each}
+        <!-- choices bottom line -->
+        <line
+            x1={strokeWidth}
+            x2={width - strokeWidth}
+            y1={width + choicesHeight}
+            y2={width + choicesHeight}
+            stroke-width={strokeWidth}
+        />
+        <!-- question -->
+        <g class="shake" bind:this={questionEl}>
+            <text
+                class="question"
+                x="535"
+                y={width + choicesHeight + 155}
+                text-anchor="middle"
+            >
+                {question}
+            </text>
+        </g>
     </svg>
+
+    <label
+        ><small>Number of choices:</small>
+        <input
+            min="1"
+            max="5"
+            bind:value={numberOfChoices}
+            type="range"
+            list="markers"
+        />
+        <datalist id="markers">
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="3"></option>
+            <option value="4"></option>
+            <option value="5"></option>
+        </datalist></label
+    >
+    {#if question !== "?"}
+        <button on:click={() => gameEnd(numberOfChoices)}>Restart</button>
+    {/if}
 </div>
 <h2>How to play</h2>
 
@@ -417,7 +467,7 @@
         font-size: 60px;
     }
 
-    g + g text {
+    .question {
         font-size: 70px;
     }
 
