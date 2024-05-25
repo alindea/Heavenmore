@@ -87,31 +87,47 @@
       offsetIndY1 = Math.round(y1 + indY1);
     const offsetIndX2 = Math.round(x1 + indX2),
       offsetIndY2 = Math.round(y1 + indY2);
-    const offsetX1 = x1,
-      offsetY1 = y1;
-    const offsetX2 = x1 + x2,
-      offsetY2 = y1 + y2;
+    const offsetX1 = Math.round(x1),
+      offsetY1 = Math.round(y1);
+    const offsetX2 = Math.round(x1 + x2),
+      offsetY2 = Math.round(y1 + y2);
 
-    // bar
     ctx.beginPath();
+
+    if (offsetIndX1 !== offsetX1) {
+      ctx.moveTo(offsetIndX1, offsetIndY1);
+      ctx.lineTo(offsetX1, offsetIndY1);
+      ctx.lineTo(offsetX1, offsetIndY2);
+      ctx.lineTo(offsetIndX1, offsetIndY2);
+    }
+
+    if (offsetIndX2 !== offsetX2) {
+      console.log(offsetIndX2, offsetX2);
+      ctx.moveTo(offsetIndX2, offsetIndY2);
+      ctx.lineTo(offsetX2, offsetIndY2);
+      ctx.lineTo(offsetX2, offsetIndY1);
+      ctx.lineTo(offsetIndX2, offsetIndY1);
+    }
+
+    if (offsetIndY1 !== offsetY1) {
+      ctx.moveTo(offsetIndX1, offsetIndY1);
+      ctx.lineTo(offsetIndX1, offsetY1);
+      ctx.lineTo(offsetIndX2, offsetY1);
+      ctx.lineTo(offsetIndX2, offsetIndY1);
+    }
+
+    if (offsetIndY2 !== offsetY2) {
+      ctx.moveTo(offsetIndX2, offsetIndY2);
+      ctx.lineTo(offsetIndX2, offsetY2);
+      ctx.lineTo(offsetIndX1, offsetY2);
+      ctx.lineTo(offsetIndX1, offsetIndY2);
+    }
+
     ctx.moveTo(offsetIndX1, offsetIndY1);
-    ctx.lineTo(offsetIndX1, offsetY2);
-    ctx.lineTo(offsetIndX2, offsetY2);
+    ctx.lineTo(offsetIndX1, offsetIndY2);
     ctx.lineTo(offsetIndX2, offsetIndY2);
     ctx.lineTo(offsetIndX2, offsetIndY1);
     ctx.lineTo(offsetIndX1, offsetIndY1);
-    ctx.stroke();
-
-    // axis
-    ctx.beginPath();
-    if (x1 !== offsetIndX1) {
-      ctx.moveTo(offsetX1, offsetY1);
-      ctx.lineTo(offsetX1, offsetY2);
-    }
-    ctx.moveTo(offsetX1, offsetY2);
-    ctx.lineTo(offsetIndX1, offsetY2);
-    ctx.moveTo(offsetIndX2, offsetY2);
-    ctx.lineTo(offsetX2, offsetY2);
     ctx.stroke();
   };
 
@@ -172,7 +188,18 @@
 
   let isSharesDefault = true;
   const sharesDefault = ["workforce", "capital"];
-  let shares = [...sharesDefault];
+
+  let shares: string[] = [...sharesDefault];
+
+  try {
+    const offlineShares = localStorage.getItem("isochrone shares");
+    if (offlineShares) {
+      shares = JSON.parse(offlineShares);
+      isSharesDefault = false;
+    }
+  } catch (error) {}
+
+  $: localStorage.setItem("isochrone shares", JSON.stringify(shares));
 
   $: population = shares.length;
 
@@ -181,7 +208,7 @@
     const hours = now.getHours().toString().padStart(2, "0");
     const minutes = now.getMinutes().toString().padStart(2, "0");
     const seconds = now.getSeconds().toString().padStart(2, "0");
-    const milliseconds = now.getMilliseconds();
+    const milliseconds = now.getMilliseconds().toString().padEnd(3, "0");
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
   };
 </script>
@@ -189,29 +216,6 @@
 <div>
   <canvas bind:this={canvas}></canvas>
   <br />
-  <label>
-    Payment: $<input
-      bind:this={elResource}
-      type="number"
-      bind:value={resource}
-    />
-  </label>
-
-  <label>
-    <small>Round</small> <input type="checkbox" bind:checked={threshold} />
-  </label>
-  {#if !isSharesDefault}
-    <button
-      type="button"
-      on:click={() => {
-        shares = [...sharesDefault];
-        isSharesDefault = true;
-        individual = 1;
-        resource = 1000000;
-      }}>Reset</button
-    >
-  {/if}
-
   <form
     on:submit|preventDefault={() => {
       shares.splice(
@@ -224,6 +228,28 @@
       isSharesDefault = false;
     }}
   >
+    <label>
+      Payment: $<input
+        bind:this={elResource}
+        type="number"
+        bind:value={resource}
+      />
+    </label>
+
+    <label>
+      <small>Round</small> <input type="checkbox" bind:checked={threshold} />
+    </label>
+    {#if !isSharesDefault}
+      <button
+        type="button"
+        on:click={() => {
+          shares = [...sharesDefault];
+          isSharesDefault = true;
+          individual = 1;
+          resource = 1000000;
+        }}>Reset</button
+      >
+    {/if}
     <table>
       <tr>
         <th>Share</th>
@@ -315,6 +341,12 @@
 </div>
 
 <style>
+  canvas {
+    display: block;
+  }
+  form {
+    width: fit-content;
+  }
   table,
   th,
   td {
