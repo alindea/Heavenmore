@@ -229,7 +229,7 @@
     }}
   >
     <label>
-      Payment: $<input
+      Profit: $<input
         bind:this={elResource}
         type="number"
         bind:value={resource}

@@ -420,7 +420,8 @@
         <button on:click={() => gameEnd(numberOfChoices)}>Restart</button>
     {/if}
 </div>
-<h2>How to play</h2>
+
+<!-- <h2>How to play</h2>
 
 <ul>
     <li>
@@ -441,7 +442,7 @@
         replace with "!" and the question will be played again.
     </li>
     <li>The game ends when all questions have been answered correctly.</li>
-</ul>
+</ul> -->
 
 <style>
     svg {
