@@ -102,7 +102,6 @@
     }
 
     if (offsetIndX2 !== offsetX2) {
-      console.log(offsetIndX2, offsetX2);
       ctx.moveTo(offsetIndX2, offsetIndY2);
       ctx.lineTo(offsetX2, offsetIndY2);
       ctx.lineTo(offsetX2, offsetIndY1);
