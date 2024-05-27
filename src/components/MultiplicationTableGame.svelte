@@ -448,7 +448,7 @@
 
 <style>
     svg {
-        max-height: calc(100vh - 2rem);
+        max-height: calc(100vh - 3rem);
         user-select: none;
         display: block;
     }
