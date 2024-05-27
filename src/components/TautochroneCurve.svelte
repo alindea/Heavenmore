@@ -157,6 +157,10 @@
     ? localStorage.removeItem("tautochrone threshold")
     : localStorage.setItem("tautochrone threshold", "-1");
 
+  $: limitDecimals
+    ? localStorage.removeItem("tautochrone limit decimals")
+    : localStorage.setItem("tautochrone limit decimals", "-1");
+
   const radius = 100;
 
   const x1 = 1,
@@ -172,7 +176,8 @@
   let population = +(localStorage.getItem("tautochrone population") || 10),
     individual = +(localStorage.getItem("tautochrone individual") || 1),
     resource = +(localStorage.getItem("tautochrone resource") || 1000000),
-    threshold = localStorage.getItem("tautochrone threshold") !== "-1";
+    threshold = localStorage.getItem("tautochrone threshold") !== "-1",
+    limitDecimals = localStorage.getItem("tautochrone limit decimals") !== "-1";
 
   let elResource: HTMLInputElement;
 
@@ -249,16 +254,21 @@
     {/if}
     <table>
       <tr>
-        <th
-          >Share <label>
+        <th>
+          Share <label>
             <small>Round</small>
             <input type="checkbox" bind:checked={threshold} />
-          </label></th
-        >
+          </label>
+        </th>
         <th>Impact</th>
         <th>Motive</th>
         <th>Remove</th>
-        <th>Graph</th>
+        <th
+          >Graph <label>
+            <small>Limit decimals</small>
+            <input type="checkbox" bind:checked={limitDecimals} />
+          </label></th
+        >
       </tr>
 
       {#each shares as motive, i}
@@ -270,7 +280,7 @@
         )}
         <tr>
           <td><b>${share}</b></td>
-          <td>
+          <td style="white-space:nowrap">
             <button
               type="button"
               disabled={i === 0}
@@ -303,7 +313,7 @@
             ></td
           >
           <td>
-            <label style="display:block;">
+            <label style="display:block;white-space:nowrap;">
               <input
                 placeholder="graph"
                 on:input={() => {
@@ -314,9 +324,13 @@
                 name="individual"
                 type="radio"
               />
-              {parseFloat((100 / population).toFixed(2))}% &rightarrow; {parseFloat(
-                (tautPercentage * 100).toFixed(2),
-              )}%
+              {#if limitDecimals}
+                {parseFloat((100 / population).toFixed(2))}% &rightarrow; {parseFloat(
+                  (tautPercentage * 100).toFixed(2),
+                )}%
+              {:else}
+                {100 / population}% &rightarrow; {tautPercentage * 100}%
+              {/if}
             </label></td
           >
         </tr>
@@ -353,7 +367,8 @@
     display: block;
   }
   form {
-    width: fit-content;
+    max-width: 100%;
+    overflow: auto;
   }
   table,
   th,
