@@ -54,6 +54,10 @@
                 >
             {:else if childNode.nodeName === "IMG"}
                 <svelte:element this={childNode.nodeName} {...attrs} />
+            {:else if childNode.nodeName === "IFRAME"}
+                <div class="iframe-container">
+                    <svelte:element this={childNode.nodeName} {...attrs} />
+                </div>
             {:else}
                 <svelte:element this={childNode.nodeName} {...attrs}>
                     <svelte:self childNodes={childNode.childNodes} {hash} />
@@ -63,6 +67,7 @@
             {#each (childNode.textContent || "").split(/\((.*?);\)/g) as part, index}
                 {#if index % 2}
                     {@const [name, props] = part.split(/({.*})/)}
+
                     <Component {name} {...parseJson(props)} />{" "}
                 {:else}
                     {part}
