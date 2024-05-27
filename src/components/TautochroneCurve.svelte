@@ -67,10 +67,11 @@
     threshold: boolean,
   ) => {
     const values = getIndividual(population, individual);
-    if (!values) return 0;
-    const share = values.yPercentage * resource;
-    const number = threshold ? Math.round(share) : share;
-    return number;
+    if (!values) return { share: 0, tautPercentage: 0 };
+    const { yPercentage: tautPercentage } = values;
+    const number = tautPercentage * resource;
+    const share = threshold ? Math.round(number) : number;
+    return { share, tautPercentage };
   };
 
   const drawIntersections = (
@@ -140,21 +141,21 @@
 
   $: {
     if (population < 1) population = 1;
-    localStorage.setItem("isochrone population", "" + population);
+    localStorage.setItem("tautochrone population", "" + population);
   }
   $: {
     if (individual < 1) individual = 1;
     if (individual > population) individual = population;
-    localStorage.setItem("isochrone individual", "" + individual);
+    localStorage.setItem("tautochrone individual", "" + individual);
   }
   $: {
     if (resource < 1) resource = 1;
-    localStorage.setItem("isochrone resource", "" + resource);
+    localStorage.setItem("tautochrone resource", "" + resource);
   }
 
   $: threshold
-    ? localStorage.removeItem("isochrone threshold")
-    : localStorage.setItem("isochrone threshold", "-1");
+    ? localStorage.removeItem("tautochrone threshold")
+    : localStorage.setItem("tautochrone threshold", "-1");
 
   const radius = 100;
 
@@ -168,10 +169,10 @@
 
   let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D | null;
 
-  let population = +(localStorage.getItem("isochrone population") || 10),
-    individual = +(localStorage.getItem("isochrone individual") || 1),
-    resource = +(localStorage.getItem("isochrone resource") || 1000000),
-    threshold = localStorage.getItem("isochrone threshold") !== "-1";
+  let population = +(localStorage.getItem("tautochrone population") || 10),
+    individual = +(localStorage.getItem("tautochrone individual") || 1),
+    resource = +(localStorage.getItem("tautochrone resource") || 1000000),
+    threshold = localStorage.getItem("tautochrone threshold") !== "-1";
 
   let elResource: HTMLInputElement;
 
@@ -191,14 +192,14 @@
   let shares: string[] = [...sharesDefault];
 
   try {
-    const offlineShares = localStorage.getItem("isochrone shares");
+    const offlineShares = localStorage.getItem("tautochrone shares");
     if (offlineShares) {
       shares = JSON.parse(offlineShares);
       isSharesDefault = false;
     }
   } catch (error) {}
 
-  $: localStorage.setItem("isochrone shares", JSON.stringify(shares));
+  $: localStorage.setItem("tautochrone shares", JSON.stringify(shares));
 
   $: population = shares.length;
 
@@ -235,9 +236,6 @@
       />
     </label>
 
-    <label>
-      <small>Round</small> <input type="checkbox" bind:checked={threshold} />
-    </label>
     {#if !isSharesDefault}
       <button
         type="button"
@@ -251,7 +249,12 @@
     {/if}
     <table>
       <tr>
-        <th>Share</th>
+        <th
+          >Share <label>
+            <small>Round</small>
+            <input type="checkbox" bind:checked={threshold} />
+          </label></th
+        >
         <th>Impact</th>
         <th>Motive</th>
         <th>Remove</th>
@@ -259,11 +262,14 @@
       </tr>
 
       {#each shares as motive, i}
+        {@const { share, tautPercentage } = getShare(
+          shares.length,
+          i + 1,
+          resource,
+          threshold,
+        )}
         <tr>
-          <td
-            ><b>${getShare(shares.length, i + 1, resource, threshold) || 0}</b
-            ></td
-          >
+          <td><b>${share}</b></td>
           <td>
             <button
               type="button"
@@ -296,9 +302,9 @@
               }}>&times;</button
             ></td
           >
-          <td
-            ><label style="display:block;"
-              ><input
+          <td>
+            <label style="display:block;">
+              <input
                 placeholder="graph"
                 on:input={() => {
                   individual = i + 1;
@@ -307,8 +313,11 @@
                 checked={individual === i + 1}
                 name="individual"
                 type="radio"
-              /></label
-            ></td
+              />
+              {parseFloat((100 / population).toFixed(2))}% &rightarrow; {parseFloat(
+                (tautPercentage * 100).toFixed(2),
+              )}%
+            </label></td
           >
         </tr>
       {/each}
