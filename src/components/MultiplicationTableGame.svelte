@@ -270,8 +270,10 @@
 
     let svg: SVGElement, choicesEl: SVGGElement, questionEl: SVGGElement;
 
-    let numberOfChoices = +(localStorage.getItem("numberOfChoices") || "2");
-    $: localStorage.setItem("numberOfChoices", "" + numberOfChoices);
+    let numberOfChoices = +(
+        localStorage.getItem("mtg number of choices") || "2"
+    );
+    $: localStorage.setItem("mtg number of choices", "" + numberOfChoices);
 
     let choices = Array(numberOfChoices).fill("?");
 
@@ -421,7 +423,7 @@
     {/if}
 </div>
 
-<!-- <h2>How to play</h2>
+<!-- <h2>How to play</h2> -->
 
 <ul>
     <li>
@@ -442,11 +444,11 @@
         replace with "!" and the question will be played again.
     </li>
     <li>The game ends when all questions have been answered correctly.</li>
-</ul> -->
+</ul>
 
 <style>
     svg {
-        max-height: 98vh;
+        max-height: calc(100vh - 2rem);
         user-select: none;
         display: block;
     }
