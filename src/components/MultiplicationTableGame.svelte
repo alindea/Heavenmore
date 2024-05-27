@@ -430,7 +430,7 @@
         Press the movable items to select an answer and start or pause the game.
     </li>
     <li>By default, all numbers are included in the game.</li>
-    <li>Press the bottom columns to toggle the numbers you want to play.</li>
+    <li>Press the columns to toggle the numbers you want to play.</li>
     <li>
         The numbers that have a "?" mark after "=" are the questions you will
         have to answer, which will be selected randomly.
@@ -441,7 +441,7 @@
     </li>
     <li>
         If you do not answer or give the wrong answer the "?" mark will be
-        replace with "!" and the question will be played again.
+        replace with the "!" mark and the question will be played again.
     </li>
     <li>The game ends when all questions have been answered correctly.</li>
 </ul>
