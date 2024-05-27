@@ -95,39 +95,25 @@
 
     ctx.beginPath();
 
-    if (offsetIndX1 !== offsetX1) {
-      ctx.moveTo(offsetIndX1, offsetIndY1);
-      ctx.lineTo(offsetX1, offsetIndY1);
-      ctx.lineTo(offsetX1, offsetIndY2);
-      ctx.lineTo(offsetIndX1, offsetIndY2);
-    }
-
-    if (offsetIndX2 !== offsetX2) {
-      ctx.moveTo(offsetIndX2, offsetIndY2);
-      ctx.lineTo(offsetX2, offsetIndY2);
-      ctx.lineTo(offsetX2, offsetIndY1);
-      ctx.lineTo(offsetIndX2, offsetIndY1);
-    }
-
-    if (offsetIndY1 !== offsetY1) {
-      ctx.moveTo(offsetIndX1, offsetIndY1);
-      ctx.lineTo(offsetIndX1, offsetY1);
-      ctx.lineTo(offsetIndX2, offsetY1);
-      ctx.lineTo(offsetIndX2, offsetIndY1);
-    }
-
-    if (offsetIndY2 !== offsetY2) {
-      ctx.moveTo(offsetIndX2, offsetIndY2);
-      ctx.lineTo(offsetIndX2, offsetY2);
-      ctx.lineTo(offsetIndX1, offsetY2);
-      ctx.lineTo(offsetIndX1, offsetIndY2);
-    }
+    ctx.moveTo(offsetIndX1, offsetY1);
+    ctx.lineTo(offsetIndX1, offsetIndY1);
+    ctx.lineTo(offsetX1, offsetIndY1);
+    ctx.moveTo(offsetIndX2, offsetY1);
+    ctx.lineTo(offsetIndX2, offsetIndY1);
+    ctx.lineTo(offsetX2, offsetIndY1);
+    ctx.moveTo(offsetIndX1, offsetY2);
+    ctx.lineTo(offsetIndX1, offsetIndY2);
+    ctx.lineTo(offsetX1, offsetIndY2);
+    ctx.moveTo(offsetIndX2, offsetY2);
+    ctx.lineTo(offsetIndX2, offsetIndY2);
+    ctx.lineTo(offsetX2, offsetIndY2);
 
     ctx.moveTo(offsetIndX1, offsetIndY1);
     ctx.lineTo(offsetIndX1, offsetIndY2);
     ctx.lineTo(offsetIndX2, offsetIndY2);
     ctx.lineTo(offsetIndX2, offsetIndY1);
     ctx.lineTo(offsetIndX1, offsetIndY1);
+
     ctx.stroke();
   };
 
@@ -280,7 +266,7 @@
         )}
         <tr>
           <td><b>${share}</b></td>
-          <td style="white-space:nowrap">
+          <td>
             <button
               type="button"
               disabled={i === 0}
@@ -313,7 +299,7 @@
             ></td
           >
           <td>
-            <label style="display:block;white-space:nowrap;">
+            <label>
               <input
                 placeholder="graph"
                 on:input={() => {
@@ -379,5 +365,6 @@
   td {
     font-size: smaller;
     padding: 0 0.5em;
+    white-space: nowrap;
   }
 </style>
